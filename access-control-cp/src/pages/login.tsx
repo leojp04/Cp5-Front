@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { findByCredentials } from "../services/usuarios";
 
 const schema = z.object({
   nomeUsuario: z.string().min(3, "Informe seu nome de usuário (mín. 3)"),
@@ -10,13 +11,28 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function Login() {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { nomeUsuario: "", email: "" },
   });
 
-  const onSubmit = async (_data: FormData) => {
+  const onSubmit = async (data: FormData) => {
+    try {
+      const user = await findByCredentials(data.nomeUsuario, data.email);
+      if (!user) {
+        setError("nomeUsuario", { message: "Credenciais não conferem." });
+        setError("email", { message: "Credenciais não conferem." });
+        return;
+      }
 
+      localStorage.setItem("access-control:user", JSON.stringify(user));
+      reset();
+      navigate("/", { replace: true });
+    } catch (err) {
+      console.error("Erro no login:", err);
+      alert("Erro ao validar. Verifique se o json-server está rodando na porta 3001.");
+    }
   };
 
   return (
@@ -52,7 +68,7 @@ export function Login() {
             className="w-full rounded-md bg-white/10 hover:bg-white/20 py-2 transition"
             type="submit"
           >
-            {isSubmitting ? "Validando..." : "Entrar"}
+            {isSubmitting ? "Entrando..." : "Entrar"}
           </button>
         </form>
 
