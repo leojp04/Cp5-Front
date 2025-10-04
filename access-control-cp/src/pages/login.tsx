@@ -1,99 +1,119 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Link } from 'react-router-dom';
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate, Link } from "react-router-dom";
 
-// Definição do Schema de Validação (Requisito 4 e 6)
-const loginSchema = z.object({
-  nomeUsuario: z
-    .string()
-    .min(1, 'O nome de usuário é obrigatório.'),
-  email: z
-    .string()
-    .min(1, 'O e-mail é obrigatório.')
-    .email('Formato de e-mail inválido.'),
+
+const API_URL = "http://localhost:3001";
+
+const schema = z.object({
+  nomeUsuario: z.string().min(3, "Informe seu nome de usuário (mín. 3)"),
+  email: z.string().email("E-mail inválido"),
 });
 
-type LoginFormData = z.infer<typeof loginSchema>;
+type FormData = z.infer<typeof schema>;
+
+
+interface User {
+  id: number;
+  nome: string;
+  nomeUsuario: string;
+  email: string;
+}
+
+// função local bem direta (sem axios/serviço separado por enquanto)
+async function fetchUserByCredentials(nomeUsuario: string, email: string): Promise<User | null> {
+  const qs = new URLSearchParams({ nomeUsuario, email }).toString();
+  const res = await fetch(`${API_URL}/usuarios?${qs}`);
+  if (!res.ok) return null;
+  const list = (await res.json()) as User[];
+  return list[0] ?? null;
+}
 
 export function Login() {
-  const { 
-    register, 
-    handleSubmit, 
-    formState: { errors, isSubmitting } 
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema)
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    reset,
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: { nomeUsuario: "", email: "" },
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    // Requisito 8: A lógica de LOGIN será implementada aqui
-    console.log("Dados prontos para o login:", data);
-    // TODO: Implementar requisição GET ao json-server e salvar em localStorage
+  const onSubmit = async (data: FormData) => {
+    try {
+      const u = await fetchUserByCredentials(data.nomeUsuario, data.email);
+
+      if (!u) {
+        // feedback direto no form (sem toast/lib extra)
+        setError("nomeUsuario", { message: "Credenciais não conferem." });
+        setError("email", { message: "Credenciais não conferem." });
+        return;
+      }
+
+      // guarda sessão de forma simples (vai ser lida no Header/Context)
+      localStorage.setItem("access-control:user", JSON.stringify(u));
+
+      // limpa o form pra não deixar dados pendurados
+      reset();
+
+
+      navigate("/", { replace: true });
+    } catch (err) {
+      console.error("Erro no login:", err);
+      alert("Erro ao realizar login. Verifique se o json-server está rodando na porta 3001.");
+    }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-xl">
-        <h2 className="text-3xl font-extrabold text-center text-gray-900">
-          Acesso ao Sistema
-        </h2>
+    <main className="min-h-screen grid place-items-center p-4">
+      <div className="w-full max-w-sm">
+        <h1 className="text-2xl font-semibold mb-6">Login</h1>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-
-          {/* Campo Nome de Usuário */}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label htmlFor="nomeUsuario" className="block text-sm font-medium text-gray-700">
-              Nome de Usuário
-            </label>
-            <input 
-              id="nomeUsuario" 
-              type="text"
-              {...register('nomeUsuario')}
-              className={`w-full p-3 mt-1 border rounded-lg transition duration-150 ${
-                errors.nomeUsuario ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-              } focus:border-blue-500 focus:outline-none`}
+            <label className="block text-sm mb-1">Nome de usuário</label>
+            <input
+              className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 outline-none focus:ring-2 focus:ring-zinc-700"
+              placeholder="ex.: leonardo.p"
+              {...register("nomeUsuario")}
+              autoComplete="username"
             />
-            {/* Exibição da mensagem de erro (Requisito 6) */}
             {errors.nomeUsuario && (
-              <p className="mt-1 text-sm text-red-600 font-semibold">{errors.nomeUsuario.message}</p>
+              <p className="text-xs text-red-400 mt-1">{errors.nomeUsuario.message}</p>
             )}
           </div>
 
-          {/* Campo Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              E-mail
-            </label>
-            <input 
-              id="email" 
-              type="email"
-              {...register('email')}
-              className={`w-full p-3 mt-1 border rounded-lg transition duration-150 ${
-                errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
-              } focus:border-blue-500 focus:outline-none`}
+            <label className="block text-sm mb-1">E-mail</label>
+            <input
+              className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 outline-none focus:ring-2 focus:ring-zinc-700"
+              placeholder="voce@exemplo.com"
+              {...register("email")}
+              autoComplete="email"
             />
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600 font-semibold">{errors.email.message}</p>
+              <p className="text-xs text-red-400 mt-1">{errors.email.message}</p>
             )}
           </div>
 
-          <button 
-            type="submit" 
+          <button
             disabled={isSubmitting}
-            className="w-full py-3 text-lg font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition duration-150 disabled:opacity-50"
+            className="w-full rounded-md bg-white/10 hover:bg-white/20 py-2 transition"
+            type="submit"
           >
-            {isSubmitting ? 'Verificando...' : 'Entrar'}
+            {isSubmitting ? "Entrando..." : "Entrar"}
           </button>
         </form>
-        
-        {/* Link para Cadastro (Requisito 3) */}
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Não tem uma conta?{' '}
-          <Link to="/cadastro" className="font-medium text-blue-600 hover:text-blue-500">
-            Cadastre-se aqui
-          </Link>
+
+        <p className="text-sm text-zinc-400 mt-4">
+          Não tem conta? <Link to="/cadastro" className="underline">Cadastre-se</Link>
         </p>
       </div>
-    </div>
+    </main>
   );
 }
