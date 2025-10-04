@@ -1,3 +1,4 @@
+// src/pages/cadastro.tsx
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,9 +12,16 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-export function Cadastro() {
+export default function Cadastro() {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset } = useForm<FormData>({
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError,
+    reset,
+  } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { nome: "", nomeUsuario: "", email: "" },
   });
@@ -21,14 +29,23 @@ export function Cadastro() {
   const onSubmit = async (data: FormData) => {
     try {
       const dup = await existsDuplicate(data.nomeUsuario, data.email);
-      if (dup.nomeUsuario) setError("nomeUsuario", { message: "Este nome de usuário já está em uso." });
-      if (dup.email) setError("email", { message: "Este e-mail já está cadastrado." });
-      if (dup.nomeUsuario || dup.email) return;
+      if (dup?.nomeUsuario) {
+        setError("nomeUsuario", { message: "Este nome de usuário já está em uso." });
+      }
+      if (dup?.email) {
+        setError("email", { message: "Este e-mail já está cadastrado." });
+      }
+      if (dup?.nomeUsuario || dup?.email) return;
 
-      await createUsuario({ nome: data.nome, nomeUsuario: data.nomeUsuario, email: data.email });
+      await createUsuario({
+        nome: data.nome,
+        nomeUsuario: data.nomeUsuario,
+        email: data.email,
+      });
+
       reset();
       alert("Cadastro realizado! Faça login para continuar.");
-      navigate("/login");
+      navigate("/login", { replace: true });
     } catch (err) {
       console.error("Erro no cadastro:", err);
       alert("Erro ao cadastrar. Verifique se o json-server está rodando na porta 3001.");
@@ -47,6 +64,7 @@ export function Cadastro() {
               className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 outline-none focus:ring-2 focus:ring-zinc-700"
               placeholder="Seu nome completo"
               {...register("nome")}
+              autoComplete="name"
             />
             {errors.nome && <p className="text-xs text-red-400 mt-1">{errors.nome.message}</p>}
           </div>
@@ -57,16 +75,21 @@ export function Cadastro() {
               className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 outline-none focus:ring-2 focus:ring-zinc-700"
               placeholder="ex.: maria.silva"
               {...register("nomeUsuario")}
+              autoComplete="username"
             />
-            {errors.nomeUsuario && <p className="text-xs text-red-400 mt-1">{errors.nomeUsuario.message}</p>}
+            {errors.nomeUsuario && (
+              <p className="text-xs text-red-400 mt-1">{errors.nomeUsuario.message}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm mb-1">E-mail</label>
             <input
+              type="email"
               className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 outline-none focus:ring-2 focus:ring-zinc-700"
               placeholder="voce@exemplo.com"
               {...register("email")}
+              autoComplete="email"
             />
             {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email.message}</p>}
           </div>

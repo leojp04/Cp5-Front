@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,12 +11,13 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-export function Login() {
+export default function Login() {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: { nomeUsuario: "", email: "" },
-  });
+  const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset } =
+    useForm<FormData>({
+      resolver: zodResolver(schema),
+      defaultValues: { nomeUsuario: "", email: "" },
+    });
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -25,7 +27,6 @@ export function Login() {
         setError("email", { message: "Credenciais não conferem." });
         return;
       }
-
       localStorage.setItem("access-control:user", JSON.stringify(user));
       reset();
       navigate("/", { replace: true });
@@ -49,12 +50,15 @@ export function Login() {
               {...register("nomeUsuario")}
               autoComplete="username"
             />
-            {errors.nomeUsuario && <p className="text-xs text-red-400 mt-1">{errors.nomeUsuario.message}</p>}
+            {errors.nomeUsuario && (
+              <p className="text-xs text-red-400 mt-1">{errors.nomeUsuario.message}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm mb-1">E-mail</label>
             <input
+              type="email"
               className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 outline-none focus:ring-2 focus:ring-zinc-700"
               placeholder="voce@exemplo.com"
               {...register("email")}
