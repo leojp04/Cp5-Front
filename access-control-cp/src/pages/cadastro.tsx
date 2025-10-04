@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { createUsuario, existsDuplicate } from "../services/usuarios";
 
 const schema = z.object({
   nome: z.string().min(3, "Informe seu nome completo"),
@@ -11,13 +12,27 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export function Cadastro() {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors, isSubmitting }, setError, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { nome: "", nomeUsuario: "", email: "" },
   });
 
-  const onSubmit = async (_data: FormData) => {
-    
+  const onSubmit = async (data: FormData) => {
+    try {
+      const dup = await existsDuplicate(data.nomeUsuario, data.email);
+      if (dup.nomeUsuario) setError("nomeUsuario", { message: "Este nome de usuário já está em uso." });
+      if (dup.email) setError("email", { message: "Este e-mail já está cadastrado." });
+      if (dup.nomeUsuario || dup.email) return;
+
+      await createUsuario({ nome: data.nome, nomeUsuario: data.nomeUsuario, email: data.email });
+      reset();
+      alert("Cadastro realizado! Faça login para continuar.");
+      navigate("/login");
+    } catch (err) {
+      console.error("Erro no cadastro:", err);
+      alert("Erro ao cadastrar. Verifique se o json-server está rodando na porta 3001.");
+    }
   };
 
   return (
@@ -61,7 +76,7 @@ export function Cadastro() {
             className="w-full rounded-md bg-white/10 hover:bg-white/20 py-2 transition"
             type="submit"
           >
-            {isSubmitting ? "Validando..." : "Cadastrar"}
+            {isSubmitting ? "Cadastrando..." : "Cadastrar"}
           </button>
         </form>
 
