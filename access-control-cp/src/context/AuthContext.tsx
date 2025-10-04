@@ -1,4 +1,7 @@
-import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from "react";
+/* eslint-disable react-refresh/only-export-components */
+// src/context/AuthContext.tsx
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 
 type User = {
   id: number;
@@ -10,11 +13,11 @@ type User = {
 type AuthCtx = {
   user: User | null;
   setUser: (u: User | null) => void;
-  ready: boolean; 
+  ready: boolean;
   logout: () => void;
 };
 
-const Context = createContext<AuthCtx | undefined>(undefined);
+export const Context = createContext<AuthCtx | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -25,7 +28,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem("access-control:user");
       if (raw) setUser(JSON.parse(raw));
     } catch {
-
       localStorage.removeItem("access-control:user");
     } finally {
       setReady(true);
