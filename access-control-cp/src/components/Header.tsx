@@ -1,9 +1,8 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Header() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <header className="w-full border-b border-zinc-800/40 bg-zinc-900/40 backdrop-blur">
@@ -22,15 +21,15 @@ export default function Header() {
               <p className="text-sm font-medium">
                 {user.nome} <span className="text-zinc-400">({user.email})</span>
               </p>
-              <button
-                onClick={() => { logout(); navigate("/login"); }}
-                className="mt-1 text-xs underline"
+              <Link
+                to="/logout"
+                className="mt-1 inline-block text-xs underline"
               >
                 sair
-              </button>
+              </Link>
             </>
           ) : (
-            <p className="text-xs text-zinc-500">não autenticado</p>
+            <p className="text-xs text-zinc-500">nuo autenticado</p>
           )}
         </div>
       </div>
