@@ -1,18 +1,20 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { createUsuario, existsDuplicate } from "../services/usuarios";
 
 const schema = z.object({
   nome: z.string().min(3, "Informe seu nome completo"),
-  nomeUsuario: z.string().min(3, "Escolha um nome de usuário (mín. 3)"),
-  email: z.string().email("E-mail inválido"),
+  nomeUsuario: z.string().min(3, "Escolha um nome de usuario (min. 3)"),
+  email: z.string().email("E-mail invalido"),
 });
 type FormData = z.infer<typeof schema>;
 
 export default function Cadastro() {
-  const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   const {
     register,
@@ -26,13 +28,16 @@ export default function Cadastro() {
   });
 
   const onSubmit = async (data: FormData) => {
+    setSuccessMessage("");
+    setSubmitError("");
+
     try {
       const dup = await existsDuplicate(data.nomeUsuario, data.email);
       if (dup?.nomeUsuario) {
-        setError("nomeUsuario", { message: "Este nome de usuário já está em uso." });
+        setError("nomeUsuario", { message: "Este nome de usuario ja esta em uso." });
       }
       if (dup?.email) {
-        setError("email", { message: "Este e-mail já está cadastrado." });
+        setError("email", { message: "Este e-mail ja esta cadastrado." });
       }
       if (dup?.nomeUsuario || dup?.email) return;
 
@@ -43,11 +48,10 @@ export default function Cadastro() {
       });
 
       reset();
-      alert("Cadastro realizado! Faça login para continuar.");
-      navigate("/login", { replace: true });
+      setSuccessMessage("Cadastro realizado! Voce ja pode fazer login.");
     } catch (err) {
       console.error("Erro no cadastro:", err);
-      alert("Erro ao cadastrar. Verifique se o json-server está rodando na porta 3001.");
+      setSubmitError("Erro ao cadastrar. Verifique se o json-server esta rodando na porta 3001.");
     }
   };
 
@@ -69,7 +73,7 @@ export default function Cadastro() {
           </div>
 
           <div>
-            <label className="block text-sm mb-1">Nome de usuário</label>
+            <label className="block text-sm mb-1">Nome de usuario</label>
             <input
               className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 outline-none focus:ring-2 focus:ring-zinc-700"
               placeholder="ex.: maria.silva"
@@ -102,8 +106,20 @@ export default function Cadastro() {
           </button>
         </form>
 
+        {successMessage && (
+          <div className="mt-4 rounded-md border border-emerald-700 bg-emerald-950/40 px-3 py-2 text-sm text-emerald-300">
+            {successMessage} <Link to="/login" className="underline">Ir para login</Link>
+          </div>
+        )}
+
+        {submitError && (
+          <div className="mt-4 rounded-md border border-red-700 bg-red-950/40 px-3 py-2 text-sm text-red-300">
+            {submitError}
+          </div>
+        )}
+
         <p className="text-sm text-zinc-400 mt-4">
-          Já tem conta? <Link to="/login" className="underline">Fazer login</Link>
+          Ja tem conta? <Link to="/login" className="underline">Fazer login</Link>
         </p>
       </div>
     </main>
