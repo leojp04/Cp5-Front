@@ -7,19 +7,20 @@ import { useAuth } from "../context/AuthContext";
 import { findByCredentials } from "../services/usuarios";
 
 const schema = z.object({
-  nomeUsuario: z.string().min(3, "Informe seu nome de usuário (mín. 3)"),
-  email: z.string().email({ message: "E-mail inválido" }),
+  nomeUsuario: z.string().min(3, "Informe seu nome de usuorio (m??n. 3)"),
+  email: z.string().email({ message: "E-mail involido" }),
+  remember: z.boolean().optional(),
 });
 type FormData = z.infer<typeof schema>;
 
 export default function Login() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, authenticate } = useAuth();
   const [authError, setAuthError] = useState("");
 
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { nomeUsuario: "", email: "" },
+    defaultValues: { nomeUsuario: "", email: "", remember: false },
   });
 
   useEffect(() => {
@@ -31,11 +32,11 @@ export default function Login() {
     try {
       const u = await findByCredentials(data.nomeUsuario, data.email);
       if (!u) {
-        setAuthError("Credenciais não conferem.");
+        setAuthError("Credenciais nuo conferem.");
         return;
       }
-      localStorage.setItem("access-control:user", JSON.stringify(u));
-      reset();
+      authenticate(u, Boolean(data.remember));
+      reset({ nomeUsuario: "", email: "", remember: Boolean(data.remember) });
       navigate("/", { replace: true });
     } catch {
       setAuthError("Erro ao validar. Verifique o json-server na porta 3001.");
@@ -48,7 +49,7 @@ export default function Login() {
         <h1 className="text-2xl font-semibold mb-6">Login</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label htmlFor="nomeUsuario" className="block text-sm mb-1">Nome de usuário</label>
+            <label htmlFor="nomeUsuario" className="block text-sm mb-1">Nome de usuorio</label>
             <input
               id="nomeUsuario"
               className={`w-full rounded-md border px-3 py-2 outline-none focus:ring-2 ${errors.nomeUsuario ? "border-red-500 bg-red-950/30 focus:ring-red-700" : "border-zinc-800 bg-zinc-900 focus:ring-zinc-700"}`}
@@ -71,6 +72,14 @@ export default function Login() {
             />
             {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email.message}</p>}
           </div>
+          <label className="flex items-center gap-2 text-sm text-zinc-300">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border border-zinc-700 bg-transparent focus:outline-none focus:ring-2 focus:ring-zinc-700"
+              {...register("remember")}
+            />
+            Lembrar de mim neste dispositivo
+          </label>
           <button
             disabled={isSubmitting}
             className="w-full rounded-md bg-white/10 hover:bg-white/20 disabled:opacity-60 py-2 transition focus:outline-none focus:ring-2 focus:ring-zinc-600"
@@ -81,7 +90,7 @@ export default function Login() {
         </form>
         {authError && <p className="text-sm text-red-400 mt-3">{authError}</p>}
         <p className="text-sm text-zinc-400 mt-4">
-          Não tem conta? <Link to="/cadastro" className="underline">Cadastre-se</Link>
+          Nuo tem conta? <Link to="/cadastro" className="underline">Cadastre-se</Link>
         </p>
       </div>
     </main>

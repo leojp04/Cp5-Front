@@ -1,7 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 // src/context/AuthContext.tsx
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { AUTH_STORAGE_KEY } from "../config";
 
 type User = {
   id: number;
@@ -10,10 +11,12 @@ type User = {
   email: string;
 };
 
+type PersistMode = "local" | "session";
+
 type AuthCtx = {
   user: User | null;
-  setUser: (u: User | null) => void;
   ready: boolean;
+  authenticate: (u: User, remember: boolean) => void;
   logout: () => void;
 };
 
@@ -21,32 +24,74 @@ export const Context = createContext<AuthCtx | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [persistMode, setPersistMode] = useState<PersistMode | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("access-control:user");
-      if (raw) setUser(JSON.parse(raw));
-    } catch {
-      localStorage.removeItem("access-control:user");
-    } finally {
+    if (typeof window === "undefined") {
       setReady(true);
+      return;
     }
+
+    const storages: Array<[Storage, PersistMode]> = [
+      [window.sessionStorage, "session"],
+      [window.localStorage, "local"],
+    ];
+
+    for (const [storage, mode] of storages) {
+      try {
+        const raw = storage.getItem(AUTH_STORAGE_KEY);
+        if (raw) {
+          setUser(JSON.parse(raw));
+          setPersistMode(mode);
+          break;
+        }
+      } catch {
+        storage.removeItem(AUTH_STORAGE_KEY);
+      }
+    }
+
+    setReady(true);
   }, []);
 
   useEffect(() => {
-    if (user) localStorage.setItem("access-control:user", JSON.stringify(user));
-    else localStorage.removeItem("access-control:user");
-  }, [user]);
+    if (typeof window === "undefined") return;
+
+    if (!user) {
+      window.sessionStorage.removeItem(AUTH_STORAGE_KEY);
+      window.localStorage.removeItem(AUTH_STORAGE_KEY);
+      return;
+    }
+
+    const serialized = JSON.stringify(user);
+
+    if (persistMode === "local") {
+      window.localStorage.setItem(AUTH_STORAGE_KEY, serialized);
+      window.sessionStorage.removeItem(AUTH_STORAGE_KEY);
+    } else {
+      window.sessionStorage.setItem(AUTH_STORAGE_KEY, serialized);
+      window.localStorage.removeItem(AUTH_STORAGE_KEY);
+    }
+  }, [user, persistMode]);
+
+  const authenticate = useCallback((u: User, remember: boolean) => {
+    setPersistMode(remember ? "local" : "session");
+    setUser(u);
+  }, []);
+
+  const logout = useCallback(() => {
+    setPersistMode(null);
+    setUser(null);
+  }, []);
 
   const value = useMemo<AuthCtx>(
     () => ({
       user,
-      setUser,
       ready,
-      logout: () => setUser(null),
+      authenticate,
+      logout,
     }),
-    [user, ready]
+    [user, ready, authenticate, logout]
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;
