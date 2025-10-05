@@ -1,4 +1,4 @@
-export const API_URL = "http://localhost:3001";
+import { API_URL } from "../config";
 
 export async function apiGet<T>(path: string): Promise<T> {
   const res = await fetch(`${API_URL}${path}`);
