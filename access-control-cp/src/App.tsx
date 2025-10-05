@@ -5,6 +5,8 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
 import Logout from "./pages/logout";
+import Perfil from "./pages/Perfil";
+import NotFound from "./pages/NotFound";
 import PrivateRoute from "./routes/PrivateRoute";
 
 export default function App() {
@@ -14,10 +16,11 @@ export default function App() {
         <Layout>
           <Routes>
             <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
+            <Route path="/perfil" element={<PrivateRoute><Perfil /></PrivateRoute>} />
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
             <Route path="/logout" element={<Logout />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
       </BrowserRouter>
