@@ -4,6 +4,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
+import Logout from "./pages/logout";
 import PrivateRoute from "./routes/PrivateRoute";
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
             <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
             <Route path="/login" element={<Login />} />
             <Route path="/cadastro" element={<Cadastro />} />
+            <Route path="/logout" element={<Logout />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </Layout>
