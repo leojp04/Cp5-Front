@@ -4,15 +4,37 @@ export default function Home() {
   const { user } = useAuth();
 
   return (
-    <main className="max-w-md mx-auto px-4 py-12">
-      <h1 className="text-2xl font-semibold mb-2">Home</h1>
-      <p className="text-zinc-400">{user ? `Bem-vindo, ${user.nome}.` : "Bem-vindo."}</p>
-      {user && (
-        <div className="mt-6 rounded-lg border border-zinc-800 bg-zinc-900 p-4">
-          <p className="text-sm">Usuário: <span className="font-medium">{user.nomeUsuario}</span></p>
-          <p className="text-sm">E-mail: <span className="font-medium">{user.email}</span></p>
+    <section className="page space-y-6">
+      <header className="space-y-2">
+        <h1 className="section-title">Painel</h1>
+        <p className="section-subtitle">
+          Centralize as informacoes dos usuarios registrados na plataforma.
+        </p>
+      </header>
+
+      {user ? (
+        <div className="card space-y-4">
+          <h2 className="text-lg font-semibold text-slate-900">Resumo do usuario autenticado</h2>
+          <dl className="grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Nome</dt>
+              <dd className="text-base font-medium text-slate-900">{user.nome}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Usuario</dt>
+              <dd className="text-base font-medium text-slate-900">{user.nomeUsuario}</dd>
+            </div>
+            <div className="sm:col-span-2">
+              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">E-mail</dt>
+              <dd className="text-base font-medium text-slate-900">{user.email}</dd>
+            </div>
+          </dl>
+        </div>
+      ) : (
+        <div className="card-muted">
+          Nenhum usuario autenticado no momento. Faca login para visualizar os dados.
         </div>
       )}
-    </main>
+    </section>
   );
 }

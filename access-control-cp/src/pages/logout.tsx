@@ -13,8 +13,8 @@ export default function Logout() {
   }, [logout, navigate]);
 
   return (
-    <main className="min-h-screen grid place-items-center p-4">
+    <section className="page-center">
       <Spinner />
-    </main>
+    </section>
   );
 }

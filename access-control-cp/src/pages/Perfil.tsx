@@ -5,31 +5,35 @@ export default function Perfil() {
 
   if (!user) {
     return (
-      <main className="min-h-screen grid place-items-center p-4">
-        <p className="text-sm text-zinc-400">Nenhum usuario autenticado.</p>
-      </main>
+      <section className="page-center">
+        <div className="card-muted">Nenhum usuario autenticado.</div>
+      </section>
     );
   }
 
   return (
-    <main className="min-h-screen grid place-items-center p-4">
-      <div className="w-full max-w-md rounded-lg border border-zinc-800 bg-zinc-900/40 p-6 backdrop-blur">
-        <h1 className="text-2xl font-semibold mb-6">Perfil</h1>
-        <dl className="space-y-4 text-sm">
+    <section className="page-center">
+      <div className="card w-full max-w-lg space-y-6">
+        <header>
+          <h1 className="text-2xl font-semibold text-slate-900">Perfil</h1>
+          <p className="section-subtitle">Informacoes do usuario autenticado no momento.</p>
+        </header>
+
+        <dl className="grid gap-4 text-sm text-slate-600">
           <div>
-            <dt className="text-zinc-400 uppercase tracking-wide text-xs">Nome</dt>
-            <dd className="text-zinc-100">{user.nome}</dd>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Nome</dt>
+            <dd className="text-base font-medium text-slate-900">{user.nome}</dd>
           </div>
           <div>
-            <dt className="text-zinc-400 uppercase tracking-wide text-xs">Nome de usuario</dt>
-            <dd className="text-zinc-100">{user.nomeUsuario}</dd>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">Usuario</dt>
+            <dd className="text-base font-medium text-slate-900">{user.nomeUsuario}</dd>
           </div>
           <div>
-            <dt className="text-zinc-400 uppercase tracking-wide text-xs">E-mail</dt>
-            <dd className="text-zinc-100">{user.email}</dd>
+            <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">E-mail</dt>
+            <dd className="text-base font-medium text-slate-900">{user.email}</dd>
           </div>
         </dl>
       </div>
-    </main>
+    </section>
   );
 }

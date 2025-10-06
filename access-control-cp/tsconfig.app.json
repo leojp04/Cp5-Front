@@ -13,7 +13,7 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noFallthroughCasesInSwitch": true,
-    "types": []
+    "types": ["vite/client"]
   },
   "include": ["src"]
 }

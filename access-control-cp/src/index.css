@@ -1,28 +1,93 @@
 @import "tailwindcss";
 
+@layer base {
+  :root {
+    color-scheme: light;
+  }
 
-@theme {
-  --color-primary: #0ea5e9;
-  --color-secondary: #1e293b;
-  --color-accent: #22c55e;
+  body {
+    @apply min-h-screen bg-slate-50 text-slate-800 antialiased;
+  }
 
-  --radius-xl: 0.75rem;
-  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  #root {
+    @apply min-h-screen;
+  }
+
+  a {
+    @apply text-inherit no-underline;
+  }
+
+  ::selection {
+    @apply bg-sky-500/20 text-slate-900;
+  }
 }
 
+@layer components {
+  .container {
+    @apply mx-auto w-full max-w-5xl px-4;
+  }
 
-.btn {
-  @apply inline-flex items-center justify-center px-4 py-2 rounded-[--radius-xl] font-medium bg-primary text-white hover:opacity-90 transition;
-}
-.btn-secondary {
-  @apply inline-flex items-center justify-center px-4 py-2 rounded-[--radius-xl] font-medium bg-secondary text-white hover:opacity-90 transition;
-}
-.input {
-  @apply w-full rounded-[--radius-xl] border border-slate-300 px-3 py-2 outline-none focus:ring-2 focus:ring-primary;
-}
-.card {
-  @apply rounded-2xl border border-slate-200 p-4 shadow-[--shadow-card] bg-white;
-}
-.page {
-  @apply mx-auto max-w-5xl px-4 py-8;
+  .page {
+    @apply container py-12;
+  }
+
+  .page-center {
+    @apply flex min-h-[480px] items-center justify-center px-4 py-16;
+  }
+
+  .page-hero {
+    @apply container py-16;
+  }
+
+  .card {
+    @apply rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-xl backdrop-blur;
+  }
+
+  .card-muted {
+    @apply rounded-3xl border border-dashed border-slate-300 bg-white/70 p-6 text-sm text-slate-500;
+  }
+
+  .input {
+    @apply block w-full rounded-2xl border border-slate-200 bg-white/90 px-4 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-200 placeholder:text-slate-400;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-60;
+  }
+
+  .btn-primary {
+    @apply bg-sky-500 text-white shadow-sm hover:bg-sky-600 focus-visible:outline-sky-500;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-900 text-white shadow-sm hover:bg-slate-800 focus-visible:outline-slate-900;
+  }
+
+  .btn-muted {
+    @apply border border-transparent bg-sky-50 text-sky-600 hover:bg-sky-100 hover:text-sky-700 focus-visible:outline-sky-500;
+  }
+
+  .btn-outline {
+    @apply border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-sky-200 hover:bg-sky-50 hover:text-sky-600 focus-visible:outline-sky-500;
+  }
+
+  .section-title {
+    @apply text-3xl font-semibold text-slate-900;
+  }
+
+  .section-subtitle {
+    @apply text-sm text-slate-500;
+  }
+
+  .status-success {
+    @apply rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700;
+  }
+
+  .status-error {
+    @apply rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-600;
+  }
+
+  .muted {
+    @apply text-sm text-slate-500;
+  }
 }
