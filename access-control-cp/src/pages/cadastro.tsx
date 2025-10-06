@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { createUsuario, existsDuplicate } from "../services/usuarios";
 
 const schema = z.object({
@@ -14,7 +15,8 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function Cadastro() {
-  const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
+  const { authenticate } = useAuth();
   const [submitError, setSubmitError] = useState("");
 
   const {
@@ -29,7 +31,6 @@ export default function Cadastro() {
   });
 
   const onSubmit = async (data: FormData) => {
-    setSuccessMessage("");
     setSubmitError("");
 
     try {
@@ -42,14 +43,15 @@ export default function Cadastro() {
       }
       if (dup?.nomeUsuario || dup?.email) return;
 
-      await createUsuario({
+      const novoUsuario = await createUsuario({
         nome: data.nome,
         nomeUsuario: data.nomeUsuario,
         email: data.email,
       });
 
+      authenticate(novoUsuario, true);
       reset();
-      setSuccessMessage("Cadastro realizado! Voce ja pode fazer login.");
+      navigate("/perfil", { replace: true });
     } catch (err) {
       console.error("Erro no cadastro:", err);
       setSubmitError("Erro ao cadastrar. Verifique se o json-server esta rodando na porta 3001.");
@@ -112,6 +114,8 @@ export default function Cadastro() {
             {errors.email && <p className="text-sm font-medium text-rose-600">{errors.email.message}</p>}
           </div>
 
+          {submitError && <div className="status-error">{submitError}</div>}
+
           <button
             disabled={isSubmitting}
             className="btn btn-secondary w-full"
@@ -120,24 +124,6 @@ export default function Cadastro() {
             {isSubmitting ? "Cadastrando..." : "Cadastrar"}
           </button>
         </form>
-
-        {successMessage && (
-          <div className="status-success">
-            {successMessage}{" "}
-            <Link to="/login" className="font-semibold text-emerald-800 underline underline-offset-4">
-              Ir para login
-            </Link>
-          </div>
-        )}
-
-        {submitError && <div className="status-error">{submitError}</div>}
-
-        <p className="muted text-center">
-          Ja tem conta? {" "}
-          <Link to="/login" className="font-semibold text-sky-600 hover:text-sky-700">
-            Fazer login
-          </Link>
-        </p>
       </div>
     </section>
   );
