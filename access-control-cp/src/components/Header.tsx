@@ -7,7 +7,9 @@ export default function Header() {
   return (
     <header className="w-full border-b border-zinc-800/40 bg-zinc-900/40 backdrop-blur">
       <div className="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-        <Link to="/" className="font-semibold">access-control-cp</Link>
+        <Link to={user ? "/home" : "/login"} className="font-semibold">
+          access-control-cp
+        </Link>
 
         <nav className="flex items-center gap-4 text-sm">
           {user ? (

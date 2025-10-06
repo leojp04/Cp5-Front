@@ -26,7 +26,6 @@ Aplicacao React + Vite para o checkpoint de Front-end, com fluxo de autenticacao
 - A rota `/logout` limpa a sessao e redireciona automaticamente para `/login`.
 
 ## Equipe
-| Integrante | RM |
-|------------|----|
-| (-) | (-) |
-| (-) | (-) |
+Fabrício Henrique Pereira — RM 563237
+Leonardo José Pereira — RM 563065
+Pedro Henrique de Oliveira — RM 562312
